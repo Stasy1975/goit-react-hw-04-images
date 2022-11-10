@@ -7,93 +7,80 @@ import Loader from "./Loader/Loader";
 import { Text } from "./ImageGallery/ImageGallery.styled"
 
 
-const App = () => {
+export const App = () => {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [isShow, setIsShow] = useState(false);
+  // const [isShow, setIsShow] = useState(false);
   const [isEmphty, setIsEmphty] = useState(true);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState('');
-  const per_page = 12;
+  // const per_page = 12;
 
 
-  handleForm = value => {
-    this.setState({
-    images: [],
-    query: value,
-    loading: false,
-    error: null,
-    page: 1,
-    isShow: false,
-    isEmphty: false,
-     });
-  };
-
-
-
-
-   componentDidUpdate(_, prevState) {
-
-    if (prevState.query !== query || prevState.page !== page) {
-      this.getImagesGallery(query, page);
+  const handleForm = value => {
+    if (value !== query){
+      setImages([]);
+      setPage(1);
+      setQuery(value);
+      setLoading(false);
+      setError(null);
+      // setIsShow(false);
+      setIsEmphty(false);
     }
   }
-  
+   
+  const incrementPage = () => {
+    setPage(page + 1)
+  };
 
 
-  
-  getImagesGallery = async (query, page) => {
-    if (!query) {
-      return;
-    }
-    this.setState({
-      loading: true,
-    });
-    try {
-      const images = await ImageService.getImages(this.state.query, this.state.page);
-      console.log(images);
-      const total = images.total
-      console.log(total);
-      if (images.images.length === 0) {
-         this.setState({ isEmphty: true });
-     
+
+
+  useEffect(() => {
+    const getImagesGallery = async () => {
+      if (!query) {
+        return;
       }
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images.images],
-        isShow: prevState.page < Math.ceil(images.total / this.per_page),
-        total: images.total
-
-      }));
-    } catch (error) {
-      console.log({ error });
-    } finally {
-      this.setState({
-        loading: false,
-      });
-    }
-  };
+      setLoading(true);
+      try {
+        const images = await ImageService.getImages(query, page);
+        console.log(images);
+        setTotal(images.total)
+        console.log(total);
+        if (images.images.length === 0) {
+          setIsEmphty(true)
+     
+        }
+        setImages(prevState => [...prevState, ...images.images]);
+        // setIsShow(page < Math.ceil(total / per_page));
+        // console.log(isShow)
+      }
+      catch (error) {
+        console.log({ error });
+        setError(error)
+      } finally {
+        setLoading(false);
+      }
+    }; getImagesGallery()
+  }, [query, page, total]);
 
 
   
 
 
-  incrementPage = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
 
 
   
   return (
     <div>
       <Searchbar onSubmit={handleForm} />
-       {loading && <Loader />}
+      {loading && <Loader />}
+      {error && <div>Opsss... {error}</div>}
       <ImageGallery images={images} />
 
-      {page < total && !error && (
+      {page < total && !error &&(
             <Button onButton={incrementPage} />
       )}
       {isEmphty && (

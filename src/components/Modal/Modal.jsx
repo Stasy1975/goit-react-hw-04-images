@@ -1,46 +1,44 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Overlay, Modal } from './Modal.styled';
 
 const modal = document.querySelector('#modal');
 
-export class ModalWindow extends Component {
-  state = {
-    isOpen: false,
+export const ModalWindow = ({ src, alt, onClose }) => {
+  const handleKeyDown = e => {
+    if (e.code === 'Escape') onClose();
+  
   };
-
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') this.props.onClose();
+  const handleBackdropClick = e => {
+    if (e.target === e.currentTarget) onClose();
   };
+  
 
-  handleBackdropClick = e => {
-    if (e.target === e.currentTarget) this.props.onClose();
-  };
 
-  render() {
-    const { src, alt } = this.props;
-    return createPortal(
-      <Overlay onClick={this.handleBackdropClick}>
-        <Modal>
-          <img src={src} alt={alt} />
-        </Modal>
-      </Overlay>,
-      modal
-    );
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keydown', handleKeyDown);
   }
+   
+
+  );
+
+ 
+
+  return createPortal(
+    <Overlay onClick={handleBackdropClick}>
+      <Modal>
+        <img src={src} alt={alt} />
+      </Modal>
+    </Overlay>,
+    modal
+  );
 }
 
-ModalWindow.propTypes = {
-  src: PropTypes.string.isRequired,
-  alt: PropTypes.string,
-  onClose: PropTypes.func.isRequired,
-};
+
+  ModalWindow.propTypes = {
+    src: PropTypes.string.isRequired,
+    alt: PropTypes.string,
+    onClose: PropTypes.func.isRequired,
+  };
