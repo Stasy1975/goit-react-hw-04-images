@@ -12,11 +12,11 @@ export const App = () => {
   const [query, setQuery] = useState('');
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  // const [isShow, setIsShow] = useState(false);
+  const [isShow, setIsShow] = useState(false);
   const [isEmphty, setIsEmphty] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState('');
-  // const per_page = 12;
+  // const [total, setTotal] = useState('');
+
 
 
   const handleForm = value => {
@@ -26,7 +26,7 @@ export const App = () => {
       setQuery(value);
       setLoading(false);
       setError(null);
-      // setIsShow(false);
+      setIsShow(false);
       setIsEmphty(false);
     }
   }
@@ -47,14 +47,14 @@ export const App = () => {
       try {
         const images = await ImageService.getImages(query, page);
         console.log(images);
-        setTotal(images.total)
-        console.log(total);
+        // setTotal(images.total)
+        // console.log(total);
         if (images.images.length === 0) {
           setIsEmphty(true)
      
         }
         setImages(prevState => [...prevState, ...images.images]);
-        // setIsShow(page < Math.ceil(total / per_page));
+        setIsShow(page < images.total);
         // console.log(isShow)
       }
       catch (error) {
@@ -64,7 +64,7 @@ export const App = () => {
         setLoading(false);
       }
     }; getImagesGallery()
-  }, [query, page, total]);
+  }, [query, page]);
 
 
   
@@ -80,7 +80,7 @@ export const App = () => {
       {error && <div>Opsss... {error}</div>}
       <ImageGallery images={images} />
 
-      {page < total && !error &&(
+      {isShow && !error &&(
             <Button onButton={incrementPage} />
       )}
       {isEmphty && (
